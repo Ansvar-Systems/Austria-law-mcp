@@ -53,18 +53,32 @@ export interface RISSearchResult {
 
 let lastRequestTime = 0;
 
-async function rateLimitedFetch(url: string): Promise<Response> {
+const REQUEST_TIMEOUT_MS = 30_000;
+const MAX_RETRIES = 3;
+
+async function rateLimitedFetch(url: string, retries = MAX_RETRIES): Promise<Response> {
   const now = Date.now();
   const elapsed = now - lastRequestTime;
   if (elapsed < RATE_LIMIT_MS) {
     await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_MS - elapsed));
   }
   lastRequestTime = Date.now();
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} for ${url}`);
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} for ${url}`);
+    }
+    return response;
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (retries > 0 && (message.includes('timeout') || message.includes('abort') || message.includes('ECONNRESET') || message.includes('fetch failed'))) {
+      const delay = (MAX_RETRIES - retries + 1) * 2000;
+      console.error(`  Timeout/error for ${url}, retrying in ${delay}ms... (${retries} left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return rateLimitedFetch(url, retries - 1);
+    }
+    throw err;
   }
-  return response;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
