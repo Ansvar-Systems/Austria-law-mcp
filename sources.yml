@@ -1,0 +1,27 @@
+schema_version: '1.0'
+mcp_name: 'Austrian Law MCP'
+jurisdiction: 'AT'
+
+sources:
+  - name: 'RIS OGD'
+    authority: 'Federal Chancellery (Bundeskanzleramt)'
+    official_portal: 'https://www.ris.bka.gv.at'
+    canonical_identifier: 'BGBl. number or short title (e.g., "Datenschutzgesetz (DSG)")'
+    retrieval_method: 'API'
+    api_documentation: 'https://data.bka.gv.at/ris/ogd/v2.6/'
+    update_frequency: 'weekly'
+    last_ingested: '2026-02-16'
+    license_or_terms:
+      type: 'CC BY 4.0'
+      url: 'https://creativecommons.org/licenses/by/4.0/'
+      summary: 'Austrian government open data under Creative Commons Attribution 4.0'
+    coverage:
+      scope: 'Austrian federal laws (cybersecurity and data protection scope)'
+      limitations: 'Initial release covers key cybersecurity legislation only'
+    languages:
+      - 'de'
+
+data_freshness:
+  automated_checks: true
+  check_frequency: 'weekly'
+  last_verified: '2026-02-16'
