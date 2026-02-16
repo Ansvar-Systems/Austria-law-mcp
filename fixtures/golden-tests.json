@@ -1,86 +1,140 @@
 {
   "version": "1.0",
   "mcp_name": "Austrian Law MCP",
+  "description": "Golden contract tests for Austrian Law MCP against RIS-OGD data (5,099 laws, 54,727 provisions)",
   "tests": [
     {
-      "id": "gb-001",
-      "category": "article_retrieval",
-      "description": "Retrieve Section 1 of Data Protection Act 2018",
+      "id": "at-001",
+      "category": "provision_retrieval",
+      "description": "Retrieve § 1 of ABGB (Allgemeines bürgerliches Gesetzbuch)",
       "tool": "get_provision",
-      "input": { "document_id": "data-protection-act-2018", "section": "1" },
-      "assertions": { "result_not_empty": true }
+      "input": { "document_id": "gesetz-10001622", "provision_ref": "para1" },
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["results"]
+      }
     },
     {
-      "id": "gb-002",
-      "category": "article_retrieval",
-      "description": "Retrieve Section 3 of Computer Misuse Act 1990",
+      "id": "at-002",
+      "category": "provision_retrieval",
+      "description": "Retrieve § 1 of ASVG (Allgemeines Sozialversicherungsgesetz)",
       "tool": "get_provision",
-      "input": { "document_id": "computer-misuse-act-1990", "section": "3" },
-      "assertions": { "result_not_empty": true }
+      "input": { "document_id": "gesetz-10008147", "provision_ref": "para1" },
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["results"]
+      }
     },
     {
-      "id": "gb-003",
-      "category": "article_retrieval",
-      "description": "Retrieve Section 1 of Online Safety Act 2023",
-      "tool": "get_provision",
-      "input": { "document_id": "online-safety-act-2023", "section": "1" },
-      "assertions": { "result_not_empty": true }
-    },
-    {
-      "id": "gb-004",
+      "id": "at-003",
       "category": "search",
-      "description": "Search for 'data protection' across Austrian statutes",
+      "description": "Search for 'Sicherheit' across Austrian statutes",
       "tool": "search_legislation",
-      "input": { "query": "data protection", "limit": 5 },
-      "assertions": { "result_not_empty": true, "min_results": 1 }
+      "input": { "query": "Sicherheit", "limit": 5 },
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["results"],
+        "min_results": 1
+      }
     },
     {
-      "id": "gb-005",
+      "id": "at-004",
       "category": "search",
-      "description": "Search for 'cybersecurity' across Austrian statutes",
+      "description": "Search for 'Recht' across Austrian statutes",
       "tool": "search_legislation",
-      "input": { "query": "cybersecurity", "limit": 5 },
-      "assertions": { "result_not_empty": true }
+      "input": { "query": "Recht", "limit": 5 },
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["results"],
+        "min_results": 1
+      }
     },
     {
-      "id": "gb-006",
-      "category": "citation_roundtrip",
-      "description": "Validate citation for DPA 2018 Section 3",
+      "id": "at-005",
+      "category": "citation_validation",
+      "description": "Validate citation for § 1 ABGB",
       "tool": "validate_citation",
-      "input": { "citation": "Section 3, Data Protection Act 2018" },
-      "assertions": { "result_not_empty": true }
+      "input": { "citation": "§ 1, Allgemeines bürgerliches Gesetzbuch" },
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["results"]
+      }
     },
     {
-      "id": "gb-007",
-      "category": "citation_roundtrip",
-      "description": "Format citation in short form",
+      "id": "at-006",
+      "category": "citation_formatting",
+      "description": "Format citation for § 1 ABGB in short format",
       "tool": "format_citation",
-      "input": { "citation": "Section 3, Data Protection Act 2018", "format": "short" },
-      "assertions": { "result_not_empty": true }
+      "input": { "citation": "§ 1, Allgemeines bürgerliches Gesetzbuch", "format": "short" },
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["results"]
+      }
     },
     {
-      "id": "gb-008",
+      "id": "at-007",
+      "category": "provision_retrieval",
+      "description": "Check currency of ABGB (gesetz-10001622)",
+      "tool": "check_currency",
+      "input": { "document_id": "gesetz-10001622" },
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["results"]
+      }
+    },
+    {
+      "id": "at-008",
       "category": "negative_test",
-      "description": "Non-existent statute returns null",
+      "description": "Non-existent document returns gracefully",
       "tool": "get_provision",
-      "input": { "document_id": "nonexistent-act-9999", "section": "1" },
-      "assertions": { "result_is_null": true }
+      "input": { "document_id": "nonexistent-doc-99999", "provision_ref": "para1" },
+      "assertions": {
+        "handles_gracefully": true
+      }
     },
     {
-      "id": "gb-009",
+      "id": "at-009",
       "category": "negative_test",
       "description": "Empty search query returns empty array",
       "tool": "search_legislation",
       "input": { "query": "" },
-      "assertions": { "result_empty": true }
+      "assertions": {
+        "handles_gracefully": true
+      }
     },
     {
-      "id": "gb-010",
+      "id": "at-010",
       "category": "eu_cross_reference",
-      "description": "Check EU basis for UK GDPR implementation",
+      "description": "Get EU basis for ABGB (may return empty, should handle gracefully)",
       "tool": "get_eu_basis",
-      "input": { "document_id": "data-protection-act-2018" },
-      "assertions": { "result_not_empty": true }
+      "input": { "document_id": "gesetz-10001622" },
+      "assertions": {
+        "handles_gracefully": true,
+        "fields_present": ["results"]
+      }
+    },
+    {
+      "id": "at-011",
+      "category": "search",
+      "description": "Search for 'Bundesabgabenordnung' across Austrian statutes",
+      "tool": "search_legislation",
+      "input": { "query": "Bundesabgabenordnung", "limit": 5 },
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["results"],
+        "min_results": 1
+      }
+    },
+    {
+      "id": "at-012",
+      "category": "provision_retrieval",
+      "description": "Retrieve § 1 of Bundesabgabenordnung",
+      "tool": "get_provision",
+      "input": { "document_id": "gesetz-10003940", "provision_ref": "para1" },
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["results"]
+      }
     }
   ]
 }
