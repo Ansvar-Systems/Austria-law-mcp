@@ -1,0 +1,168 @@
+name: Data Freshness Check
+
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      auto_update:
+        description: 'Automatically refresh changed anchor statutes and commit'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      updates_found: ${{ steps.check.outputs.updates_found }}
+      errors_found: ${{ steps.check.outputs.errors_found }}
+      update_ids: ${{ steps.check.outputs.update_ids }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Download bundled database
+        run: bash scripts/download-db.sh
+
+      - name: Build
+        run: npm run build
+
+      - name: Check upstream updates
+        id: check
+        run: |
+          set +e
+          npm run check-updates > check_updates_output.txt 2>&1
+          STATUS=$?
+          set -e
+
+          cat check_updates_output.txt
+
+          UPDATE_LINES=$(grep -E '^- gesetz-[0-9]+' check_updates_output.txt || true)
+          ERROR_LINES=$(grep -E 'error:' check_updates_output.txt || true)
+
+          if [ -n "$UPDATE_LINES" ]; then
+            echo "updates_found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "updates_found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -n "$ERROR_LINES" ] || [ "$STATUS" -eq 2 ]; then
+            echo "errors_found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "errors_found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          UPDATE_IDS=$(echo "$UPDATE_LINES" | awk '{print $2}' | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+          echo "update_ids=$UPDATE_IDS" >> "$GITHUB_OUTPUT"
+
+      - name: Upload check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: check-updates-report
+          path: check_updates_output.txt
+          retention-days: 14
+
+  auto-refresh:
+    runs-on: ubuntu-latest
+    needs: check
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      inputs.auto_update == 'true' &&
+      needs.check.outputs.updates_found == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Download bundled database
+        run: bash scripts/download-db.sh
+
+      - name: Refresh changed anchor statutes
+        env:
+          UPDATE_IDS: ${{ needs.check.outputs.update_ids }}
+        run: |
+          set -euo pipefail
+          for DOC_ID in $UPDATE_IDS; do
+            LAW_NUMBER="${DOC_ID#gesetz-}"
+            echo "Refreshing $DOC_ID (law $LAW_NUMBER)"
+            rm -f "data/seed/${DOC_ID}.json"
+            npm run ingest -- --law "$LAW_NUMBER"
+          done
+
+      - name: Apply seed updates and test
+        env:
+          UPDATE_IDS: ${{ needs.check.outputs.update_ids }}
+        run: |
+          npm run db:update-seed -- --laws "${UPDATE_IDS}"
+          npm run validate
+
+      - name: Commit refreshed data
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/database.db data/seed data/source sources.yml
+          git commit -m "chore(data): auto-refresh Austrian law anchor statutes"
+          git push
+
+  report:
+    runs-on: ubuntu-latest
+    needs: [check]
+    if: needs.check.outputs.updates_found == 'true' || needs.check.outputs.errors_found == 'true'
+    steps:
+      - name: Create freshness issue
+        uses: actions/github-script@v7
+        env:
+          UPDATES_FOUND: ${{ needs.check.outputs.updates_found }}
+          ERRORS_FOUND: ${{ needs.check.outputs.errors_found }}
+          UPDATE_IDS: ${{ needs.check.outputs.update_ids }}
+        with:
+          script: |
+            const title = `Austrian data freshness check — ${new Date().toISOString().slice(0, 10)}`;
+            const updatesFound = process.env.UPDATES_FOUND === 'true';
+            const errorsFound = process.env.ERRORS_FOUND === 'true';
+            const updateIds = (process.env.UPDATE_IDS || '').trim();
+
+            const sections = [];
+            if (updatesFound) {
+              sections.push(`## Updates detected\n\n${updateIds ? updateIds.split(' ').map(id => `- ${id}`).join('\n') : '- (unable to parse IDs)'}`);
+            }
+            if (errorsFound) {
+              sections.push('## Errors detected\n\nSee workflow logs and attached artifact `check-updates-report`.');
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: sections.join('\n\n'),
+              labels: ['data-freshness', 'automated'],
+            });

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "eu.ansvar/austrian-law-mcp",
+  "description": "Austrian Law MCP \u2014 German legislation via Model Context Protocol",
+  "repository": {
+    "url": "https://github.com/Ansvar-Systems/Austria-law-mcp",
+    "source": "github"
+  },
+  "homepage": "https://ansvar.eu",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "claude",
+    "at-law",
+    "austria",
+    "legal",
+    "compliance",
+    "ris-ogd",
+    "ansvar"
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@ansvar/austrian-law-mcp",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
