@@ -1,9 +1,12 @@
 /**
- * check_currency — Check if a Austrian statute is current (in force).
+ * check_currency — Check if an Austrian statute is current (in force).
  */
 
 import type { Database } from '@ansvar/mcp-sqlite';
 import { generateResponseMetadata, type ToolResponse } from '../utils/metadata.js';
+import { resolveExistingStatuteId } from '../utils/statute-id.js';
+import { normalizeAsOfDate } from '../utils/as-of-date.js';
+import { buildProvisionLookupCandidates } from '../utils/provision-candidates.js';
 
 export interface CheckCurrencyInput {
   document_id: string;
@@ -40,12 +43,21 @@ export async function checkCurrency(
     throw new Error('document_id is required');
   }
 
+  if (input.as_of_date) {
+    normalizeAsOfDate(input.as_of_date);
+  }
+
+  const resolvedDocumentId = resolveExistingStatuteId(db, input.document_id);
+
   const doc = db.prepare(`
     SELECT id, title, status, type as document_type, issued_date, in_force_date
     FROM legal_documents
     WHERE id = ? OR title LIKE ?
     LIMIT 1
-  `).get(input.document_id, `%${input.document_id}%`) as DocumentRow | undefined;
+  `).get(
+    resolvedDocumentId ?? input.document_id,
+    `%${input.document_id}%`,
+  ) as DocumentRow | undefined;
 
   if (!doc) {
     return {
@@ -63,9 +75,20 @@ export async function checkCurrency(
 
   let provisionExists: boolean | undefined;
   if (input.provision_ref) {
+    const candidates = buildProvisionLookupCandidates(input.provision_ref);
+    const where = [
+      ...candidates.provisionRefs.map(() => 'provision_ref = ?'),
+      ...candidates.sections.map(() => 'section = ?'),
+    ];
+    const params = [...candidates.provisionRefs, ...candidates.sections];
     const prov = db.prepare(
-      'SELECT 1 FROM legal_provisions WHERE document_id = ? AND (provision_ref = ? OR section = ?)'
-    ).get(doc.id, input.provision_ref, input.provision_ref);
+      `
+      SELECT 1 FROM legal_provisions
+      WHERE document_id = ?
+        AND (${where.join(' OR ')})
+      LIMIT 1
+      `
+    ).get(doc.id, ...params);
     provisionExists = !!prov;
 
     if (!provisionExists) {

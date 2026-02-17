@@ -15,7 +15,8 @@ export default defineConfig({
     reporters: ['verbose'],
     testTimeout: 5000,
     hookTimeout: 5000,
-    fileParallelism: true,
+    // SQLite WASM backend in @ansvar/mcp-sqlite can lock under parallel file execution.
+    fileParallelism: false,
     watchExclude: ['node_modules', 'dist'],
   },
 });

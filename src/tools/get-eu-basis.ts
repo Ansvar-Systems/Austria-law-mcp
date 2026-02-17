@@ -1,5 +1,5 @@
 /**
- * get_eu_basis — Retrieve EU legal basis for a Austrian statute.
+ * get_eu_basis — Retrieve EU legal basis for an Austrian statute.
  */
 
 import type { Database } from '@ansvar/mcp-sqlite';

@@ -1,5 +1,5 @@
 export type EUDocumentType = 'directive' | 'regulation';
-export type EUCommunity = 'EU' | 'EC' | 'EEC' | 'Euratom';
+export type EUCommunity = 'EU' | 'EG' | 'EWG' | 'Euratom';
 export type ReferenceType = 'implements' | 'supplements' | 'applies' | 'cites' | 'cites_article';
 export type ImplementationStatus = 'full' | 'partial' | 'pending' | 'unknown';
 

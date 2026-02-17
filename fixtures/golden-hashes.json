@@ -1,6 +1,33 @@
 {
+  "$schema": "./golden-hashes.schema.json",
   "version": "1.0",
   "mcp_name": "Austrian Law MCP",
-  "note": "Populate after first successful database build",
-  "hashes": {}
+  "jurisdiction": "AT",
+  "description": "Drift detection anchors for stable Austrian statutes.",
+  "provisions": [
+    {
+      "id": "at-hash-001",
+      "description": "ABGB consolidated page (Gesetzesnummer 10001622)",
+      "upstream_url": "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001622",
+      "selector_hint": "Fassung vom",
+      "expected_sha256": "COMPUTE_ON_FIRST_RUN",
+      "expected_snippet": "Allgemeines bürgerliches Gesetzbuch"
+    },
+    {
+      "id": "at-hash-002",
+      "description": "Bundesabgabenordnung consolidated page (Gesetzesnummer 10003940)",
+      "upstream_url": "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10003940",
+      "selector_hint": "Fassung vom",
+      "expected_sha256": "COMPUTE_ON_FIRST_RUN",
+      "expected_snippet": "Bundesabgabenordnung"
+    },
+    {
+      "id": "at-hash-003",
+      "description": "ASVG consolidated page (Gesetzesnummer 10008147)",
+      "upstream_url": "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10008147",
+      "selector_hint": "Fassung vom",
+      "expected_sha256": "COMPUTE_ON_FIRST_RUN",
+      "expected_snippet": "Allgemeines Sozialversicherungsgesetz"
+    }
+  ]
 }

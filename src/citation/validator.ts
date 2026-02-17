@@ -1,5 +1,5 @@
 /**
- * UK legal citation validator.
+ * Austrian legal citation validator.
  *
  * Validates a citation string against the database to ensure the document
  * and provision actually exist (zero-hallucination enforcement).
@@ -8,6 +8,8 @@
 import type { Database } from '@ansvar/mcp-sqlite';
 import type { ValidationResult } from '../types/index.js';
 import { parseCitation } from './parser.js';
+import { resolveExistingStatuteId } from '../utils/statute-id.js';
+import { buildProvisionLookupCandidates } from '../utils/provision-candidates.js';
 
 export function validateCitation(db: Database, citation: string): ValidationResult {
   const parsed = parseCitation(citation);
@@ -22,17 +24,31 @@ export function validateCitation(db: Database, citation: string): ValidationResu
     };
   }
 
-  // Look up document by title match
-  const doc = db.prepare(
-    "SELECT id, title, status FROM legal_documents WHERE title LIKE ? LIMIT 1"
-  ).get(`%${parsed.title}%${parsed.year ?? ''}%`) as { id: string; title: string; status: string } | undefined;
+  const explicitId = citation.match(/\bgesetz-\d+\b/i)?.[0];
+  const lookupTerm = parsed.title ?? explicitId;
+
+  if (!lookupTerm) {
+    return {
+      citation: parsed,
+      document_exists: false,
+      provision_exists: false,
+      warnings: ['Citation must include either a statute title or statute ID (e.g. gesetz-10001622).'],
+    };
+  }
+
+  const resolvedId = resolveExistingStatuteId(db, lookupTerm);
+  const doc = resolvedId
+    ? (db.prepare(
+      'SELECT id, title, status FROM legal_documents WHERE id = ? LIMIT 1'
+    ).get(resolvedId) as { id: string; title: string; status: string } | undefined)
+    : undefined;
 
   if (!doc) {
     return {
       citation: parsed,
       document_exists: false,
       provision_exists: false,
-      warnings: [`Document "${parsed.title} ${parsed.year}" not found in database`],
+      warnings: [`Document "${lookupTerm}" not found in database`],
     };
   }
 
@@ -43,14 +59,27 @@ export function validateCitation(db: Database, citation: string): ValidationResu
   // Check provision existence
   let provisionExists = false;
   if (parsed.section) {
-    const prov = db.prepare(
-      "SELECT 1 FROM legal_provisions WHERE document_id = ? AND section = ?"
-    ).get(doc.id, parsed.section);
+    const candidates = buildProvisionLookupCandidates(parsed.section);
+    const whereClauses = [
+      ...candidates.provisionRefs.map(() => 'provision_ref = ?'),
+      ...candidates.sections.map(() => 'section = ?'),
+    ];
+    const params: string[] = [...candidates.provisionRefs, ...candidates.sections];
+    const sql = `
+      SELECT 1 FROM legal_provisions
+      WHERE document_id = ?
+        AND (${whereClauses.join(' OR ')})
+      LIMIT 1
+    `;
+    const prov = db.prepare(sql).get(doc.id, ...params);
     provisionExists = !!prov;
 
     if (!provisionExists) {
-      warnings.push(`Section ${parsed.section} not found in ${doc.title}`);
+      warnings.push(`Section § ${parsed.section} not found in ${doc.title}`);
     }
+  } else {
+    // Citation without section still validates as document-level citation.
+    provisionExists = true;
   }
 
   return {

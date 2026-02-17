@@ -3,7 +3,7 @@
 /**
  * Austrian Law MCP Server — stdio entry point.
  *
- * Provides UK legislation search via Model Context Protocol.
+ * Provides Austrian legislation search via Model Context Protocol.
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -11,17 +11,17 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import Database from '@ansvar/mcp-sqlite';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { createHash } from 'crypto';
-import { readFileSync } from 'fs';
 
 import { registerTools, type AboutContext } from './tools/registry.js';
 import { detectCapabilities, readDbMetadata } from './capabilities.js';
+import {
+  DB_ENV_VAR,
+  SERVER_NAME,
+  SERVER_VERSION,
+} from './server-info.js';
+import { makeAboutContext } from './utils/about-context.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const SERVER_NAME = 'austrian-legal-citations';
-const SERVER_VERSION = '1.0.0';
-const DB_ENV_VAR = 'AUSTRIAN_LAW_DB_PATH';
 
 function resolveDbPath(): string {
   if (process.env[DB_ENV_VAR]) {
@@ -48,25 +48,7 @@ function getDb(): InstanceType<typeof Database> {
 
 function computeAboutContext(): AboutContext {
   const dbPath = resolveDbPath();
-  let fingerprint = 'unknown';
-  let dbBuilt = 'unknown';
-
-  try {
-    const buf = readFileSync(dbPath);
-    fingerprint = createHash('sha256').update(buf).digest('hex').slice(0, 12);
-  } catch {
-    // DB might not exist in dev
-  }
-
-  try {
-    const database = getDb();
-    const row = database.prepare("SELECT value FROM db_metadata WHERE key = 'built_at'").get() as { value: string } | undefined;
-    if (row) dbBuilt = row.value;
-  } catch {
-    // Ignore
-  }
-
-  return { version: SERVER_VERSION, fingerprint, dbBuilt };
+  return makeAboutContext(dbPath, getDb(), SERVER_VERSION);
 }
 
 async function main() {

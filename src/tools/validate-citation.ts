@@ -1,5 +1,5 @@
 /**
- * validate_citation — Validate a UK legal citation against the database.
+ * validate_citation — Validate an Austrian legal citation against the database.
  */
 
 import type { Database } from '@ansvar/mcp-sqlite';

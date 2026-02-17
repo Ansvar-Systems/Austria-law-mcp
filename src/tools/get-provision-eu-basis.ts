@@ -1,11 +1,12 @@
 /**
- * get_provision_eu_basis — Get EU legal basis for a specific UK provision.
+ * get_provision_eu_basis — Get EU legal basis for a specific Austrian provision.
  */
 
 import type { Database } from '@ansvar/mcp-sqlite';
 import type { ProvisionEUReference } from '../types/index.js';
 import { generateResponseMetadata, type ToolResponse } from '../utils/metadata.js';
 import { resolveExistingStatuteId } from '../utils/statute-id.js';
+import { buildProvisionLookupCandidates } from '../utils/provision-candidates.js';
 
 export interface GetProvisionEUBasisInput {
   document_id: string;
@@ -35,9 +36,22 @@ export async function getProvisionEUBasis(
     throw new Error(`Document "${input.document_id}" not found in database`);
   }
 
+  const candidates = buildProvisionLookupCandidates(input.provision_ref);
+  const where = [
+    ...candidates.provisionRefs.map(() => 'provision_ref = ?'),
+    ...candidates.sections.map(() => 'section = ?'),
+  ];
+  const params = [...candidates.provisionRefs, ...candidates.sections];
+
   const provision = db.prepare(
-    'SELECT id, content FROM legal_provisions WHERE document_id = ? AND (provision_ref = ? OR section = ?)'
-  ).get(resolvedId, input.provision_ref, input.provision_ref) as { id: number; content: string } | undefined;
+    `
+    SELECT id, content
+    FROM legal_provisions
+    WHERE document_id = ?
+      AND (${where.join(' OR ')})
+    LIMIT 1
+    `
+  ).get(resolvedId, ...params) as { id: number; content: string } | undefined;
 
   if (!provision) {
     throw new Error(`Provision ${input.provision_ref} not found in ${input.document_id}`);

@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version", "mcp_name", "provisions"],
+  "properties": {
+    "version": { "type": "string" },
+    "mcp_name": { "type": "string" },
+    "jurisdiction": { "type": "string" },
+    "description": { "type": "string" },
+    "provisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "upstream_url",
+          "selector_hint",
+          "expected_sha256"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "upstream_url": { "type": "string" },
+          "selector_hint": { "type": "string" },
+          "expected_sha256": { "type": "string" },
+          "expected_snippet": { "type": "string" }
+        }
+      }
+    }
+  }
+}

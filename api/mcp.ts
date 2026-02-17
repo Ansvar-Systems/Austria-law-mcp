@@ -3,29 +3,71 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import Database from '@ansvar/mcp-sqlite';
 import { join } from 'path';
-import { existsSync, copyFileSync, rmSync } from 'fs';
+import { copyFileSync, existsSync, rmSync, statSync } from 'fs';
 
-import { registerTools } from '../src/tools/registry.js';
+import { registerTools, type AboutContext } from '../src/tools/registry.js';
+import { makeAboutContext } from '../src/utils/about-context.js';
+import {
+  DB_ENV_VAR,
+  SERVER_NAME,
+  SERVER_VERSION,
+} from '../src/server-info.js';
 
-const SOURCE_DB = process.env.AUSTRIAN_LAW_DB_PATH
+const SOURCE_DB = process.env[DB_ENV_VAR]
   || join(process.cwd(), 'data', 'database.db');
-const TMP_DB = '/tmp/database.db';
-const TMP_DB_LOCK = '/tmp/database.db.lock';
+const TMP_DB = `/tmp/${SERVER_NAME}.db`;
+const TMP_DB_LOCK = `${TMP_DB}.lock`;
 
 let db: InstanceType<typeof Database> | null = null;
+let aboutContext: AboutContext | undefined;
+let sourceDbSignature = '';
+
+function computeSignature(path: string): string {
+  const stat = statSync(path);
+  return `${stat.size}:${stat.mtimeMs}`;
+}
+
+function ensureTmpDatabaseCurrent(): void {
+  const latestSignature = computeSignature(SOURCE_DB);
+  const shouldRefresh = !existsSync(TMP_DB) || sourceDbSignature !== latestSignature;
+
+  if (!shouldRefresh) {
+    return;
+  }
+
+  if (db) {
+    db.close();
+    db = null;
+  }
+
+  aboutContext = undefined;
+  sourceDbSignature = latestSignature;
+
+  if (existsSync(TMP_DB_LOCK)) {
+    rmSync(TMP_DB_LOCK, { recursive: true, force: true });
+  }
+
+  rmSync(TMP_DB, { force: true });
+  copyFileSync(SOURCE_DB, TMP_DB);
+}
 
 function getDatabase(): InstanceType<typeof Database> {
-  if (!db) {
-    if (existsSync(TMP_DB_LOCK)) {
-      rmSync(TMP_DB_LOCK, { recursive: true, force: true });
-    }
-    if (!existsSync(TMP_DB)) {
-      copyFileSync(SOURCE_DB, TMP_DB);
-    }
-    db = new Database(TMP_DB, { readonly: true });
-    db.pragma('foreign_keys = ON');
+  ensureTmpDatabaseCurrent();
+
+  if (db) {
+    return db;
   }
+
+  db = new Database(TMP_DB, { readonly: true });
+  db.pragma('foreign_keys = ON');
   return db;
+}
+
+function getAboutContext(database: InstanceType<typeof Database>): AboutContext {
+  if (!aboutContext) {
+    aboutContext = makeAboutContext(TMP_DB, database, SERVER_VERSION);
+  }
+  return aboutContext;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -41,8 +83,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'GET') {
     res.status(200).json({
-      name: 'austrian-legal-citations',
-      version: '1.0.0',
+      name: SERVER_NAME,
+      version: SERVER_VERSION,
       protocol: 'mcp-streamable-http',
     });
     return;
@@ -57,11 +99,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const database = getDatabase();
 
     const server = new Server(
-      { name: 'austrian-legal-citations', version: '1.0.0' },
+      { name: SERVER_NAME, version: SERVER_VERSION },
       { capabilities: { tools: {} } }
     );
 
-    registerTools(server, database);
+    registerTools(server, database, getAboutContext(database));
 
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,

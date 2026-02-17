@@ -42,6 +42,6 @@ export function generateResponseMetadata(
     disclaimer:
       'This data is derived from RIS OGD open data. ' +
       'Verify against official publications when legal certainty is required.',
-    source_authority: 'The National Archives (RIS OGD)',
+    source_authority: 'Federal Chancellery (Bundeskanzleramt) via RIS OGD',
   };
 }

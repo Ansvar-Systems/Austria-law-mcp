@@ -8,6 +8,8 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import Database from '@ansvar/mcp-sqlite';
 import { registerTools } from '../../src/tools/registry.js';
+import { makeAboutContext } from '../../src/utils/about-context.js';
+import { SERVER_VERSION } from '../../src/server-info.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -26,6 +28,7 @@ interface GoldenTestAssertions {
   upstream_text_hash?: { url: string; expected_sha256: string };
   citation_resolves?: boolean;
   handles_gracefully?: boolean;
+  json_path_equals?: Record<string, string | number | boolean | null>;
 }
 
 interface GoldenTest {
@@ -94,6 +97,18 @@ function stringifyData(data: unknown): string {
   return JSON.stringify(data, null, 0) ?? '';
 }
 
+function getPathValue(data: unknown, path: string): unknown {
+  const parts = path.split('.').filter(Boolean);
+  let current: unknown = data;
+  for (const part of parts) {
+    if (current == null || typeof current !== 'object') {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
 async function callTool(
   mcpClient: Client,
   name: string,
@@ -154,7 +169,7 @@ describe(`Contract tests: ${fixture.mcp_name}`, () => {
       { name: 'austrian-law-test', version: '0.0.0' },
       { capabilities: { tools: {} } },
     );
-    registerTools(server, db);
+    registerTools(server, db, makeAboutContext(dbPath, db, SERVER_VERSION));
 
     mcpClient = new Client({ name: 'test-client', version: '0.0.0' }, { capabilities: {} });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -225,6 +240,16 @@ describe(`Contract tests: ${fixture.mcp_name}`, () => {
           const text = stringifyData(result.data);
           expect(text.trim().length).toBeGreaterThan(0);
         });
+      }
+
+      if (test.assertions.json_path_equals) {
+        for (const [path, expected] of Object.entries(test.assertions.json_path_equals)) {
+          it(`result path "${path}" equals ${JSON.stringify(expected)}`, async () => {
+            result ??= await callTool(mcpClient, test.tool, test.input);
+            const actual = getPathValue(result.data, path);
+            expect(actual).toEqual(expected);
+          });
+        }
       }
 
       if (test.assertions.min_results !== undefined) {

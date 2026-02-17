@@ -1,4 +1,6 @@
 import type Database from '@ansvar/mcp-sqlite';
+import { REPOSITORY_URL, SERVER_PACKAGE } from '../server-info.js';
+import { generateResponseMetadata, type ResponseMetadata } from '../utils/metadata.js';
 
 export interface AboutContext {
   version: string;
@@ -32,6 +34,7 @@ export interface AboutResult {
     filesystem_access: boolean;
     arbitrary_code: boolean;
   };
+  _metadata: ResponseMetadata;
 }
 
 function safeCount(db: InstanceType<typeof Database>, sql: string): number {
@@ -50,10 +53,10 @@ export function getAbout(
   return {
     server: {
       name: 'Austrian Law MCP',
-      package: '@ansvar/austrian-law-mcp',
+      package: SERVER_PACKAGE,
       version: context.version,
       suite: 'Ansvar Compliance Suite',
-      repository: 'https://github.com/Ansvar-Systems/Austria-law-mcp',
+      repository: REPOSITORY_URL,
     },
     dataset: {
       fingerprint: context.fingerprint,
@@ -86,5 +89,6 @@ export function getAbout(
       filesystem_access: false,
       arbitrary_code: false,
     },
+    _metadata: generateResponseMetadata(db),
   };
 }

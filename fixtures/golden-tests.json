@@ -11,7 +11,11 @@
       "input": { "document_id": "gesetz-10001622", "provision_ref": "para1" },
       "assertions": {
         "result_not_empty": true,
-        "fields_present": ["results"]
+        "fields_present": ["results"],
+        "json_path_equals": {
+          "results.document_id": "gesetz-10001622",
+          "results.provision_ref": "para1"
+        }
       }
     },
     {
@@ -22,7 +26,11 @@
       "input": { "document_id": "gesetz-10008147", "provision_ref": "para1" },
       "assertions": {
         "result_not_empty": true,
-        "fields_present": ["results"]
+        "fields_present": ["results"],
+        "json_path_equals": {
+          "results.document_id": "gesetz-10008147",
+          "results.provision_ref": "para1"
+        }
       }
     },
     {
@@ -57,7 +65,12 @@
       "input": { "citation": "§ 1, Allgemeines bürgerliches Gesetzbuch" },
       "assertions": {
         "result_not_empty": true,
-        "fields_present": ["results"]
+        "fields_present": ["results"],
+        "json_path_equals": {
+          "results.valid": true,
+          "results.document_exists": true,
+          "results.provision_exists": true
+        }
       }
     },
     {
@@ -68,7 +81,11 @@
       "input": { "citation": "§ 1, Allgemeines bürgerliches Gesetzbuch", "format": "short" },
       "assertions": {
         "result_not_empty": true,
-        "fields_present": ["results"]
+        "fields_present": ["results"],
+        "json_path_equals": {
+          "results.valid": true
+        },
+        "text_contains": ["§ 1"]
       }
     },
     {
@@ -79,7 +96,11 @@
       "input": { "document_id": "gesetz-10001622" },
       "assertions": {
         "result_not_empty": true,
-        "fields_present": ["results"]
+        "fields_present": ["results"],
+        "json_path_equals": {
+          "results.document_id": "gesetz-10001622",
+          "results.is_current": true
+        }
       }
     },
     {
@@ -110,7 +131,10 @@
       "input": { "document_id": "gesetz-10001622" },
       "assertions": {
         "handles_gracefully": true,
-        "fields_present": ["results"]
+        "fields_present": ["results"],
+        "json_path_equals": {
+          "results.document_id": "gesetz-10001622"
+        }
       }
     },
     {
@@ -133,7 +157,26 @@
       "input": { "document_id": "gesetz-10003940", "provision_ref": "para1" },
       "assertions": {
         "result_not_empty": true,
-        "fields_present": ["results"]
+        "fields_present": ["results"],
+        "json_path_equals": {
+          "results.document_id": "gesetz-10003940",
+          "results.provision_ref": "para1"
+        }
+      }
+    },
+    {
+      "id": "at-013",
+      "category": "metadata",
+      "description": "About tool exposes dataset metadata and provenance",
+      "tool": "about",
+      "input": {},
+      "assertions": {
+        "result_not_empty": true,
+        "fields_present": ["server", "dataset", "provenance"],
+        "json_path_equals": {
+          "server.name": "Austrian Law MCP",
+          "dataset.jurisdiction": "Austria (AT)"
+        }
       }
     }
   ]

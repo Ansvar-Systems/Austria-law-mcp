@@ -50,7 +50,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'get_provision',
-    description: 'Retrieve a specific provision (section) from a Austrian statute.',
+    description: 'Retrieve a specific provision (section) from an Austrian statute.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -63,11 +63,11 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'validate_citation',
-    description: 'Validate a UK legal citation against the database. Zero-hallucination check.',
+    description: 'Validate an Austrian legal citation against the database. Zero-hallucination check.',
     inputSchema: {
       type: 'object',
       properties: {
-        citation: { type: 'string', description: 'Citation string to validate (e.g., "Section 3, Data Protection Act 2018")' },
+        citation: { type: 'string', description: 'Citation string to validate (e.g., "§ 1, Allgemeines bürgerliches Gesetzbuch")' },
       },
       required: ['citation'],
     },
@@ -87,7 +87,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'format_citation',
-    description: 'Format a UK legal citation per standard conventions (full, short, or pinpoint).',
+    description: 'Format an Austrian legal citation per standard conventions (full, short, or pinpoint).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -99,7 +99,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'check_currency',
-    description: 'Check if a Austrian statute or provision is currently in force.',
+    description: 'Check if an Austrian statute or provision is currently in force.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -111,7 +111,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'get_eu_basis',
-    description: 'Get EU legal basis (directives/regulations) for a Austrian statute or retained EU law.',
+    description: 'Get EU legal basis (directives/regulations) for an Austrian statute or retained EU law.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -137,7 +137,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'search_eu_implementations',
-    description: 'Search for EU directives/regulations with UK implementation information.',
+    description: 'Search for EU directives/regulations with Austrian implementation information.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -145,14 +145,14 @@ export const TOOLS: Tool[] = [
         type: { type: 'string', enum: ['directive', 'regulation'], description: 'Filter by type' },
         year_from: { type: 'number', description: 'Filter by year (from)' },
         year_to: { type: 'number', description: 'Filter by year (to)' },
-        has_austrian_implementation: { type: 'boolean', description: 'Filter by UK implementation' },
+        has_austrian_implementation: { type: 'boolean', description: 'Filter by Austrian implementation' },
         limit: { type: 'number', description: 'Max results (default: 20, max: 100)' },
       },
     },
   },
   {
     name: 'get_provision_eu_basis',
-    description: 'Get EU legal basis for a specific provision within a Austrian statute.',
+    description: 'Get EU legal basis for a specific provision within an Austrian statute.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -164,7 +164,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'validate_eu_compliance',
-    description: 'Validate EU compliance status for a Austrian statute or provision.',
+    description: 'Validate EU compliance status for an Austrian statute or provision.',
     inputSchema: {
       type: 'object',
       properties: {
