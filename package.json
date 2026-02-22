@@ -1,7 +1,7 @@
 {
   "name": "@ansvar/austrian-law-mcp",
   "mcpName": "austrian-law-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Austrian Law MCP — German legislation via Model Context Protocol",
   "type": "module",
   "main": "dist/index.js",
@@ -50,7 +50,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Ansvar-Systems/Austria-law-mcp.git"
+    "url": "git+https://github.com/Ansvar-Systems/Austrian-law-mcp.git"
   },
   "bugs": {
     "url": "https://github.com/Ansvar-Systems/Austria-law-mcp/issues"
