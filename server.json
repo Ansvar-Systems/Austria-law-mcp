@@ -1,53 +1,40 @@
 {
-  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/registry/main/schema/server.json",
-  "name": "austrian-law-mcp",
-  "description": "Austrian federal legislation (statutes, EU cross-references) via the Model Context Protocol. Sourced from RIS OGD (Bundeskanzleramt).",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "eu.ansvar/austrian-law-mcp",
+  "description": "Austrian federal legislation — statutes and EU cross-references via MCP",
+  "repository": {
+    "url": "https://github.com/Ansvar-Systems/Austrian-law-mcp",
+    "source": "github"
+  },
+  "homepage": "https://ansvar.eu",
   "version": "1.0.2",
-  "repository": "https://github.com/Ansvar-Systems/Austria-law-mcp",
-  "homepage": "https://github.com/Ansvar-Systems/Austria-law-mcp#readme",
-  "author": {
-    "name": "Ansvar Systems AB",
-    "email": "hello@ansvar.ai",
-    "url": "https://ansvar.ai"
-  },
   "license": "Apache-2.0",
-  "categories": [
-    "legal",
-    "compliance",
-    "government"
-  ],
-  "tags": [
+  "keywords": [
+    "austrian-law",
     "austria",
-    "law",
-    "legislation",
-    "ris-ogd",
-    "eu-cross-references",
-    "german-language"
+    "legal",
+    "ris",
+    "bundesrecht",
+    "compliance",
+    "mcp"
   ],
-  "installations": {
-    "npm": {
-      "type": "npm",
-      "package_name": "@ansvar/austrian-law-mcp",
-      "command": "npx -y @ansvar/austrian-law-mcp"
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@ansvar/austrian-law-mcp",
+      "version": "1.0.2",
+      "transport": {
+        "type": "stdio"
+      }
     },
-    "hosted": {
-      "type": "streamable-http",
-      "url": "https://austrian-law-mcp.vercel.app/mcp"
+    {
+      "registryType": "npm",
+      "identifier": "@ansvar/austrian-law-mcp",
+      "version": "1.0.2",
+      "transport": {
+        "type": "streamable-http",
+        "url": "https://austrian-law-mcp.vercel.app/mcp"
+      }
     }
-  },
-  "tools": [
-    "search_legislation",
-    "get_provision",
-    "validate_citation",
-    "build_legal_stance",
-    "format_citation",
-    "check_currency",
-    "list_sources",
-    "get_eu_basis",
-    "get_austrian_implementations",
-    "search_eu_implementations",
-    "get_provision_eu_basis",
-    "validate_eu_compliance",
-    "about"
   ]
 }
