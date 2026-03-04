@@ -1,6 +1,7 @@
 {
   "name": "@ansvar/austrian-law-mcp",
-  "version": "1.0.0",
+  "mcpName": "eu.ansvar/austrian-law-mcp",
+  "version": "1.0.3",
   "description": "Austrian Law MCP — German legislation via Model Context Protocol",
   "type": "module",
   "main": "dist/index.js",
@@ -26,7 +27,8 @@
     "drift:detect": "node --import tsx scripts/drift-detect.ts",
     "validate": "npm test && npm run test:contract",
     "prepublishOnly": "npm run build",
-    "postinstall": "test -d dist || npm run build || true"
+    "postinstall": "test -d dist || npm run build || true",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@ansvar/mcp-sqlite": "^1.0.3",
@@ -48,7 +50,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Ansvar-Systems/Austria-law-mcp.git"
+    "url": "git+https://github.com/Ansvar-Systems/Austrian-law-mcp.git"
   },
   "bugs": {
     "url": "https://github.com/Ansvar-Systems/Austria-law-mcp/issues"

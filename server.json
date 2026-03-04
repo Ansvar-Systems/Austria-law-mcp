@@ -1,0 +1,40 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "eu.ansvar/austrian-law-mcp",
+  "description": "Austrian federal legislation — statutes and EU cross-references via MCP",
+  "repository": {
+    "url": "https://github.com/Ansvar-Systems/Austrian-law-mcp",
+    "source": "github"
+  },
+  "homepage": "https://ansvar.eu",
+  "version": "1.0.3",
+  "license": "Apache-2.0",
+  "keywords": [
+    "austrian-law",
+    "austria",
+    "legal",
+    "ris",
+    "bundesrecht",
+    "compliance",
+    "mcp"
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@ansvar/austrian-law-mcp",
+      "version": "1.0.3",
+      "transport": {
+        "type": "stdio"
+      }
+    },
+    {
+      "registryType": "npm",
+      "identifier": "@ansvar/austrian-law-mcp",
+      "version": "1.0.3",
+      "transport": {
+        "type": "streamable-http",
+        "url": "https://austrian-law-mcp.vercel.app/mcp"
+      }
+    }
+  ]
+}

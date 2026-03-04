@@ -126,7 +126,12 @@ CREATE TABLE eu_documents (
   repeals TEXT
 );
 
+CREATE INDEX idx_documents_title ON legal_documents(title);
+CREATE INDEX idx_documents_short_name ON legal_documents(short_name);
+
 CREATE INDEX idx_eu_documents_type_year ON eu_documents(type, year DESC);
+CREATE INDEX idx_eu_documents_short_name ON eu_documents(short_name);
+CREATE INDEX idx_eu_documents_celex ON eu_documents(celex_number);
 
 -- EU References (links national provisions to EU documents)
 CREATE TABLE eu_references (

@@ -81,10 +81,25 @@ export async function searchLegislation(
     return db.prepare(sql).all(...bound) as SearchLegislationResult[];
   };
 
-  const primaryResults = runQuery(queryVariants.primary);
-  const results = (primaryResults.length > 0 || !queryVariants.fallback)
-    ? primaryResults
-    : runQuery(queryVariants.fallback);
+  // Try primary query; if FTS5 syntax error, fall back to sanitized tokens
+  let results: SearchLegislationResult[];
+  try {
+    results = runQuery(queryVariants.primary);
+    if (results.length === 0 && queryVariants.fallback) {
+      results = runQuery(queryVariants.fallback);
+    }
+  } catch {
+    // FTS5 syntax error from malformed user input — fall back
+    if (queryVariants.fallback) {
+      try {
+        results = runQuery(queryVariants.fallback);
+      } catch {
+        results = [];
+      }
+    } else {
+      results = [];
+    }
+  }
 
   return {
     results,

@@ -38,7 +38,7 @@ export function formatCitation(
 }
 
 function buildPinpoint(parsed: ParsedCitation): string {
-  let ref = parsed.section ?? '';
+  let ref = parsed.section!;
   if (parsed.subsection) {
     ref += `(${parsed.subsection})`;
   }

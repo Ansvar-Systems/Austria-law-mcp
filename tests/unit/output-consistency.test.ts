@@ -12,6 +12,7 @@ import { getAustrianImplementations } from '../../src/tools/get-austrian-impleme
 import { searchEUImplementations } from '../../src/tools/search-eu-implementations.js';
 import { getProvisionEUBasis } from '../../src/tools/get-provision-eu-basis.js';
 import { validateEUCompliance } from '../../src/tools/validate-eu-compliance.js';
+import { listSources } from '../../src/tools/list-sources.js';
 import { getAbout } from '../../src/tools/about.js';
 import { makeAboutContext } from '../../src/utils/about-context.js';
 import { SERVER_VERSION } from '../../src/server-info.js';
@@ -49,8 +50,10 @@ describe('Tool output consistency', () => {
     const searchImpl = await searchEUImplementations(db, { query: 'privacy', limit: 1 });
     const provisionBasis = await getProvisionEUBasis(db, { document_id: 'gesetz-10001622', provision_ref: '§1' });
     const compliance = await validateEUCompliance(db, { document_id: 'gesetz-10001622', provision_ref: '1' });
+    const sources = await listSources(db);
 
     assertMetadataShape(about);
+    assertMetadataShape(sources);
     assertMetadataShape(search);
     assertMetadataShape(provision);
     assertMetadataShape(citation);

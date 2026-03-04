@@ -48,8 +48,9 @@ export async function searchEUImplementations(
   const params: (string | number)[] = [];
 
   if (input.query?.trim()) {
-    sql += ` AND (ed.title LIKE ? OR ed.short_name LIKE ? OR ed.celex_number LIKE ?)`;
-    const term = `%${input.query.trim()}%`;
+    sql += ` AND (ed.title LIKE ? ESCAPE '\\' OR ed.short_name LIKE ? ESCAPE '\\' OR ed.celex_number LIKE ? ESCAPE '\\')`;
+    const escaped = input.query.trim().replace(/[%_\\]/g, '\\$&');
+    const term = `%${escaped}%`;
     params.push(term, term, term);
   }
   if (input.type) { sql += ` AND ed.type = ?`; params.push(input.type); }

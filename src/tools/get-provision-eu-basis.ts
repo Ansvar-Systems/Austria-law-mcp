@@ -7,6 +7,7 @@ import type { ProvisionEUReference } from '../types/index.js';
 import { generateResponseMetadata, type ToolResponse } from '../utils/metadata.js';
 import { resolveExistingStatuteId } from '../utils/statute-id.js';
 import { buildProvisionLookupCandidates } from '../utils/provision-candidates.js';
+import { cleanProvisionContent } from '../utils/content-cleaner.js';
 
 export interface GetProvisionEUBasisInput {
   document_id: string;
@@ -78,7 +79,7 @@ export async function getProvisionEUBasis(
     results: {
       document_id: resolvedId,
       provision_ref: input.provision_ref,
-      provision_content: provision.content,
+      provision_content: cleanProvisionContent(provision.content),
       eu_references: rows.map(r => {
         const ref: ProvisionEUReference = {
           id: r.id, type: r.type,

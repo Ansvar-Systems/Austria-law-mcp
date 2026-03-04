@@ -10,7 +10,7 @@
       "description": "ABGB consolidated page (Gesetzesnummer 10001622)",
       "upstream_url": "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001622",
       "selector_hint": "Fassung vom",
-      "expected_sha256": "COMPUTE_ON_FIRST_RUN",
+      "expected_sha256": "6be2f0896243a6736846e604e7dfb42718571878b875d5fc8a306901c89b49ab",
       "expected_snippet": "Allgemeines bürgerliches Gesetzbuch"
     },
     {
@@ -18,7 +18,7 @@
       "description": "Bundesabgabenordnung consolidated page (Gesetzesnummer 10003940)",
       "upstream_url": "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10003940",
       "selector_hint": "Fassung vom",
-      "expected_sha256": "COMPUTE_ON_FIRST_RUN",
+      "expected_sha256": "83dad2c42f565dd1643dd93c3f1f07c864a1376cd17b4ac77c50a46e343207a2",
       "expected_snippet": "Bundesabgabenordnung"
     },
     {
@@ -26,7 +26,7 @@
       "description": "ASVG consolidated page (Gesetzesnummer 10008147)",
       "upstream_url": "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10008147",
       "selector_hint": "Fassung vom",
-      "expected_sha256": "COMPUTE_ON_FIRST_RUN",
+      "expected_sha256": "0637d4c07fea0ef1cd9a6baa32813137272c3717d5043233c6bd7a2683b18a8c",
       "expected_snippet": "Allgemeines Sozialversicherungsgesetz"
     }
   ]

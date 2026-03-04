@@ -49,14 +49,16 @@ export async function checkCurrency(
 
   const resolvedDocumentId = resolveExistingStatuteId(db, input.document_id);
 
+  // Escape SQL LIKE wildcards in user input to prevent unintended pattern matching
+  const escapedId = input.document_id.replace(/[%_]/g, '\\$&');
   const doc = db.prepare(`
     SELECT id, title, status, type as document_type, issued_date, in_force_date
     FROM legal_documents
-    WHERE id = ? OR title LIKE ?
+    WHERE id = ? OR title LIKE ? ESCAPE '\\'
     LIMIT 1
   `).get(
     resolvedDocumentId ?? input.document_id,
-    `%${input.document_id}%`,
+    `%${escapedId}%`,
   ) as DocumentRow | undefined;
 
   if (!doc) {

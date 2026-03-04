@@ -76,9 +76,23 @@ export async function buildLegalStance(
     return db.prepare(provSql).all(...bound) as ProvisionHit[];
   };
 
-  let provisions = runProvisionQuery(queryVariants.primary);
-  if (provisions.length === 0 && queryVariants.fallback) {
-    provisions = runProvisionQuery(queryVariants.fallback);
+  // Try primary query; if FTS5 syntax error, fall back to sanitized tokens
+  let provisions: ProvisionHit[];
+  try {
+    provisions = runProvisionQuery(queryVariants.primary);
+    if (provisions.length === 0 && queryVariants.fallback) {
+      provisions = runProvisionQuery(queryVariants.fallback);
+    }
+  } catch {
+    if (queryVariants.fallback) {
+      try {
+        provisions = runProvisionQuery(queryVariants.fallback);
+      } catch {
+        provisions = [];
+      }
+    } else {
+      provisions = [];
+    }
   }
 
   return {

@@ -56,8 +56,8 @@ export function validateCitation(db: Database, citation: string): ValidationResu
     warnings.push('This statute has been repealed');
   }
 
-  // Check provision existence
-  let provisionExists = false;
+  // Check provision existence (document-level citations without section default to true)
+  let provisionExists = !parsed.section;
   if (parsed.section) {
     const candidates = buildProvisionLookupCandidates(parsed.section);
     const whereClauses = [
@@ -77,9 +77,6 @@ export function validateCitation(db: Database, citation: string): ValidationResu
     if (!provisionExists) {
       warnings.push(`Section § ${parsed.section} not found in ${doc.title}`);
     }
-  } else {
-    // Citation without section still validates as document-level citation.
-    provisionExists = true;
   }
 
   return {

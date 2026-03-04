@@ -92,23 +92,14 @@ function parseSection(
 ): ParsedCitation {
   const normalized = sectionStr.replace(/^para/i, '').trim();
   const sectionMatch = normalized.match(SECTION_REF);
-  if (!sectionMatch) {
-    return {
-      valid: true,
-      type,
-      title: title?.trim(),
-      year,
-      section: normalized,
-    };
-  }
 
   return {
     valid: true,
     type,
     title: title?.trim(),
     year,
-    section: sectionMatch[1],
-    subsection: sectionMatch[2] ?? undefined,
-    paragraph: sectionMatch[3] ?? undefined,
+    section: sectionMatch?.[1] ?? normalized,
+    subsection: sectionMatch?.[2] ?? undefined,
+    paragraph: sectionMatch?.[3] ?? undefined,
   };
 }
