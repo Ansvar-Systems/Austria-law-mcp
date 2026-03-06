@@ -14,6 +14,7 @@ export interface GetProvisionInput {
   chapter?: string;
   section?: string;
   provision_ref?: string;
+  article?: string;
 }
 
 export interface ProvisionResult {
@@ -48,7 +49,7 @@ export async function getProvision(
 
   const resolvedDocumentId = resolveExistingStatuteId(db, input.document_id) ?? input.document_id;
 
-  const provisionRef = input.provision_ref ?? input.section;
+  const provisionRef = input.provision_ref ?? input.section ?? input.article;
 
   // If no specific provision, return all provisions for the document (capped)
   const MAX_PROVISIONS = 200;
